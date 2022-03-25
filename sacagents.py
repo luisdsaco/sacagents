@@ -22,6 +22,10 @@ Module to develop an architecture of agents
 
 from threading import Thread, Condition, Timer, Event
 
+class AgentStopped(Exception):
+    def __init__(self):
+        Exception.__init__(self)
+        print('Agent is Stopped')
    
 class Agent(Thread):
 
@@ -75,6 +79,9 @@ class Agent(Thread):
             self.ev.clear()
 
     def sendmessage(self,msg):
+        if self.isRunning == False:
+            raise AgentStopped
+            return
         with self.send:
             self.message = msg
             self.send.notify()
@@ -125,6 +132,9 @@ class SpyAgent(Agent):
             print (self.confession[self.state])
         except KeyError:
             print("Language Error")
+            
+    def addconfession(self,l,m):
+        self.confession.update([(l,m)])
         
 class CounterAgent(Agent):
     def __init__(self,initialstate=0):

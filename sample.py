@@ -20,31 +20,32 @@ Created on Thu Mar 24 13:08:39 2022
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from sacagents import Agent, SpyAgent, CounterAgent
+from sacagents import AgentStopped, Agent, SpyAgent, CounterAgent
+
+def testmessage(ag):
+    print ('The current status of created agent ', ag.ID(), ' is ',
+           ag.status())
+    print ("The total number of agents is ", Agent.totalAgents())
 
 if __name__ == "__main__":
     
     print ("Sacagents 0.0.1: (C) 2022 Luis Díaz Saco")
+    
+    # Testing Creation and Cloning
+    
     ag1 = Agent(0)
-    print ('El estado actual del agente creado ', ag1.ID(), ' es ',
-           ag1.status())
-    print ("El número total de agentes es ", Agent.totalAgents())
+    testmessage(ag1)
     ag2 = Agent(5)
-    print ("El estado actual del agente creado ", ag2.ID(), "es ",
-           ag2.status())
-    print ("El número total de agentes es ", Agent.totalAgents())
+    testmessage(ag2)
     ag3 = ag1.clone()
-    print ("El estado actual del agente creado ", ag3.ID(), "es ",
-           ag3.status())
-    print ("El número total de agentes es ", Agent.totalAgents())
+    testmessage(ag3)
     ag4 = SpyAgent('English')
-    print ("El estado actual del agente creado ", ag4.ID(), "es ",
-           ag4.status())
-    print ("El número total de agentes es ", Agent.totalAgents())
+    testmessage(ag4)
     ag5 = CounterAgent()
-    print ("El estado actual del agente creado ", ag5.ID(), "es ",
-           ag5.status())
-    print ("El número total de agentes es ", Agent.totalAgents())
+    testmessage(ag5)
+    
+    # Testing direct execution
+    
     aglist = [ag1,ag2,ag3,ag4]
     
     for ag in aglist:
@@ -57,6 +58,8 @@ if __name__ == "__main__":
         if ag.is_alive():
             ag.join()
     
+    # Testing threded operations
+    
     for i in range(5):
         print("Send message ",i)
         ag5.sendmessage('Thread')
@@ -64,28 +67,49 @@ if __name__ == "__main__":
     ag5.sendmessage('Stop')
     if ag5.is_alive():
         ag5.join()
+
+    # Testing delayed operations
     
     ag4 = SpyAgent('German')
-    print ("El estado actual del agente creado ", ag4.ID(), "es ",
-           ag4.status())
-    print ("El número total de agentes es ", Agent.totalAgents())
+    testmessage(ag4)
     ag4.sendmessage('Timer')
     ag4.sendmessage('Stop')
     ag4.join()
+
+    # Testing erroneous commands
+    
     ag5 = SpyAgent('Spanish')
-    print ("El estado actual del agente creado ", ag5.ID(), "es ",
-           ag5.status())
-    print ("El número total de agentes es ", Agent.totalAgents())
+    testmessage(ag5)
     ag5.sendmessage('Err')
     ag5.sendmessage('Stop')
     ag5.join()
+
+    # Testing invalid data and excpetion handling
+
     ag3 = SpyAgent('French')
-    print ("El estado actual del agente creado ", ag3.ID(), "es ",
-           ag3.status())
-    print ("El número total de agentes es ", Agent.totalAgents())
+    testmessage(ag3)
     ag3.sendmessage('Run')
     ag3.sendmessage('Stop')
-    ag5.join()
+    ag3.join()
+    ag3.addconfession('French','Je suis un espion américain')
+    try:
+        ag3.sendmessage('Run')
+        ag3.sendmessage('Stop')
+        ag3.join()
+    except AgentStopped:
+        print('Cannot receive messages again')
+
+   # Testing the modificacion of the status
+
+    ag3 = SpyAgent('French')
+    ag3.addconfession('French','Je suis un espion américain')
+    try:
+        ag3.sendmessage('Run')
+        ag3.sendmessage('Stop')
+        ag3.join()
+    except AgentStopped:
+        print('Cannot execute it again')
     
     print ("End of program before")
     
+    # Delayed messages will appear after the last print command
