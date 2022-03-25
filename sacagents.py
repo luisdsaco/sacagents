@@ -3,6 +3,21 @@
 Editor de Spyder
 
 Module to develop an architecture of agents
+
+(C) 2017-2022 Luis Díaz Saco
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from threading import Thread, Condition, Timer, Event
@@ -100,14 +115,20 @@ class Agent(Thread):
 class SpyAgent(Agent):
     def __init__(self,initialstate):
         Agent.__init__(self,initialstate)
-
+        self.confession = {'English': 'I am an American Spy',
+                           'Spanish': 'Soy un espía americano',
+                           'German': 'Ich bin an Americanisher Spion'
+                           }
+        
     def mainop(self):
-        print ("Ich bin ein Amerikanischer Spion")
+        try:
+            print (self.confession[self.state])
+        except KeyError:
+            print("Language Error")
         
 class CounterAgent(Agent):
     def __init__(self,initialstate=0):
         Agent.__init__(self,initialstate)
-#        self.count = initialstate
     
     def mainop(self):
         self.state += 1
