@@ -69,8 +69,12 @@ if __name__ == "__main__":
         ag5.join()
 
     # Testing delayed operations
+    # German agents only confess after 10 attempts
+    # There is programmed a delayed confession
     
     ag4 = SpyAgent('German')
+    for i in range(10):
+        ag4.sendmessage('Run')
     testmessage(ag4)
     ag4.sendmessage('Timer')
     ag4.sendmessage('Stop')
@@ -84,7 +88,7 @@ if __name__ == "__main__":
     ag5.sendmessage('Stop')
     ag5.join()
 
-    # Testing invalid data and excpetion handling
+    # Testing invalid data and exception handling
 
     ag3 = SpyAgent('French')
     testmessage(ag3)

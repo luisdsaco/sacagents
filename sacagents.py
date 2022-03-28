@@ -23,11 +23,19 @@ Module to develop an architecture of agents
 from threading import Thread, Condition, Timer, Event
 
 class AgentStopped(Exception):
+    """
+    AgentStopped: Exception raised when someone tries to run an operation on
+        an agent that has been stopped.
+    """
+    
     def __init__(self):
         Exception.__init__(self)
         print('Agent is Stopped')
    
 class Agent(Thread):
+    """
+    Agent: Base Class to process messages between agents and to run operations
+    """
 
     totalagents = 0
     def __init__(self,initialstate):
@@ -44,6 +52,10 @@ class Agent(Thread):
         self.action = Thread(target=self.runaction)
         self.ev = Event()
         self.action.start()
+        self.messageop={"Run": self.mainop,\
+                        "Thread": self.mainthreadop,\
+                        "Timer": self.maintimerop\
+                        }
 
     def status(self):
         return self.state
@@ -89,14 +101,9 @@ class Agent(Thread):
             self.receive.wait()
     
     def processmessage(self):
-        messageop = {"Run": self.mainop,\
-                     "Thread": self.mainthreadop,\
-                     "Timer": self.maintimerop\
-                     }
-        
         cmd = self.messagelist.pop(0)
         try:
-            messageop[cmd]()
+            self.messageop[cmd]()
         except KeyError:
             print("Command Error")
             
@@ -120,23 +127,39 @@ class Agent(Thread):
         self.action.join()
 
 class SpyAgent(Agent):
+    """
+    SpyAgent: Demostration class inspired in the movie One, two, three
+    """
+    
     def __init__(self,initialstate):
         Agent.__init__(self,initialstate)
         self.confession = {'English': 'I am an American Spy',
                            'Spanish': 'Soy un espía americano',
-                           'German': 'Ich bin an Americanisher Spion'
+                           'German': 'Ich bin ein Americanisher Spion'
                            }
+        self.ag=CounterAgent()
         
     def mainop(self):
-        try:
-            print (self.confession[self.state])
-        except KeyError:
-            print("Language Error")
+        if self.ag.status() < 10 and self.status() == 'German':
+            self.ag.sendmessage('Run')
+            print('Nein ')
+        else:
+            self.fakeconfession()
+            self.ag.sendmessage('Stop')
             
     def addconfession(self,l,m):
         self.confession.update([(l,m)])
         
+    def fakeconfession(self):
+        try:
+            print (self.confession[self.state])
+        except KeyError:
+            print("Language Error")
+        
 class CounterAgent(Agent):
+    """
+    Counter Agent: Increases the state when its operation is runned
+    """
     def __init__(self,initialstate=0):
         Agent.__init__(self,initialstate)
     
