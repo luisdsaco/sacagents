@@ -21,6 +21,7 @@ Module to develop an architecture of agents
 """
 
 from threading import Thread, Condition, Timer, Event
+from queue import Queue
 
 class AgentStopped(Exception):
     """
@@ -45,7 +46,7 @@ class Agent(Thread):
         self.state = initialstate
         self.message = 0
         self.send = Condition()
-        self.messagelist = []
+        self.messagelist = Queue()
         self.isRunning = False
         self.receive = Condition()
         self.start()
@@ -54,7 +55,8 @@ class Agent(Thread):
         self.action.start()
         self.messageop={"Run": self.mainop,\
                         "Thread": self.mainthreadop,\
-                        "Timer": self.maintimerop\
+                        "Timer": self.maintimerop,\
+                        "Stop": self.mainopstop\
                         }
 
     def status(self):
@@ -74,6 +76,9 @@ class Agent(Thread):
         thd = Timer(time,self.mainop)
         thd.start()
                        
+    def mainopstop(self):
+        pass
+    
     def setstatus(self,st):
         self.state = st
         
@@ -101,14 +106,16 @@ class Agent(Thread):
             self.receive.wait()
     
     def processmessage(self):
-        cmd = self.messagelist.pop(0)
+        cmd = self.messagelist.get()
         try:
             self.messageop[cmd]()
         except KeyError:
             print("Command Error")
+        finally:
+            self.messagelist.task_done()
             
     def processmessagelist(self):
-        while len(self.messagelist)>0:
+        while not self.messagelist.empty():
             self.processmessage()
 
     def run(self):
@@ -116,15 +123,14 @@ class Agent(Thread):
         while (self.isRunning):
             with self.send:
                 self.send.wait()
+                self.messagelist.put(self.message)
                 if self.message == 'Stop':
                     self.isRunning = False
-                else:
-                    self.messagelist.append(self.message)
                 self.ev.set()
             with self.receive:
                 self.receive.notify()
-        self.processmessagelist()
-        self.action.join()
+        self.messagelist.join()
+
 
 class SpyAgent(Agent):
     """
@@ -142,10 +148,14 @@ class SpyAgent(Agent):
     def mainop(self):
         if self.ag.status() < 10 and self.status() == 'German':
             self.ag.sendmessage('Run')
-            print('Nein ')
+            print('Nein')
         else:
             self.fakeconfession()
-            self.ag.sendmessage('Stop')
+            
+    def mainopstop(self):
+        self.ag.sendmessage('Stop')
+        self.ag.join()
+        Agent.mainopstop(self)
             
     def addconfession(self,l,m):
         self.confession.update([(l,m)])
@@ -166,4 +176,3 @@ class CounterAgent(Agent):
     def mainop(self):
         self.state += 1
         Agent.mainop(self)
-

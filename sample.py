@@ -20,6 +20,7 @@ Created on Thu Mar 24 13:08:39 2022
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+
 from sacagents import AgentStopped, Agent, SpyAgent, CounterAgent
 
 def testmessage(ag):
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     for ag in aglist:
         if ag.is_alive():
             ag.join()
-    
+        
     # Testing threded operations
     
     for i in range(5):
