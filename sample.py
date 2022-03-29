@@ -21,39 +21,40 @@ Created on Thu Mar 24 13:08:39 2022
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from sacagents import AgentStopped, Agent, SpyAgent, CounterAgent
+from sacagents import AgentStoppedError, Agent, SpyAgent, CounterAgent
+from sacagents import __version__ as sac_ver, __author__ as sac_auth
 
-def testmessage(ag):
+def test_message(ag):
     print ('The current status of created agent ', ag.ID(), ' is ',
            ag.status())
-    print ("The total number of agents is ", Agent.totalAgents())
+    print ("The total number of agents is ", Agent.total_num_agents())
 
 if __name__ == "__main__":
     
-    print ("Sacagents 0.0.1: (C) 2022 Luis Díaz Saco")
+    print ("Using Sacagents ", sac_ver, ": (C) 2022 ", sac_auth)
     
     # Testing Creation and Cloning
     
     ag1 = Agent(0)
-    testmessage(ag1)
+    test_message(ag1)
     ag2 = Agent(5)
-    testmessage(ag2)
+    test_message(ag2)
     ag3 = ag1.clone()
-    testmessage(ag3)
+    test_message(ag3)
     ag4 = SpyAgent('English')
-    testmessage(ag4)
+    test_message(ag4)
     ag5 = CounterAgent()
-    testmessage(ag5)
+    test_message(ag5)
     
     # Testing direct execution
     
     aglist = [ag1,ag2,ag3,ag4]
     
     for ag in aglist:
-        ag.sendmessage('Run')
+        ag.send_message('Run')
 
     for ag in aglist:
-        ag.sendmessage('Stop')
+        ag.send_message('Stop')
         
     for ag in aglist:
         if ag.is_alive():
@@ -63,9 +64,9 @@ if __name__ == "__main__":
     
     for i in range(5):
         print("Send message ",i)
-        ag5.sendmessage('Thread')
+        ag5.send_message('Thread')
     
-    ag5.sendmessage('Stop')
+    ag5.send_message('Stop')
     if ag5.is_alive():
         ag5.join()
 
@@ -75,44 +76,44 @@ if __name__ == "__main__":
     
     ag4 = SpyAgent('German')
     for i in range(10):
-        ag4.sendmessage('Run')
-    testmessage(ag4)
-    ag4.sendmessage('Timer')
-    ag4.sendmessage('Stop')
+        ag4.send_message('Run')
+    test_message(ag4)
+    ag4.send_message('Timer')
+    ag4.send_message('Stop')
     ag4.join()
 
     # Testing erroneous commands
     
     ag5 = SpyAgent('Spanish')
-    testmessage(ag5)
-    ag5.sendmessage('Err')
-    ag5.sendmessage('Stop')
+    test_message(ag5)
+    ag5.send_message('Err')
+    ag5.send_message('Stop')
     ag5.join()
 
     # Testing invalid data and exception handling
 
     ag3 = SpyAgent('French')
-    testmessage(ag3)
-    ag3.sendmessage('Run')
-    ag3.sendmessage('Stop')
+    test_message(ag3)
+    ag3.send_message('Run')
+    ag3.send_message('Stop')
     ag3.join()
-    ag3.addconfession('French','Je suis un espion américain')
+    ag3.add_confession('French','Je suis un espion américain')
     try:
-        ag3.sendmessage('Run')
-        ag3.sendmessage('Stop')
+        ag3.send_message('Run')
+        ag3.send_message('Stop')
         ag3.join()
-    except AgentStopped:
+    except AgentStoppedError:
         print('Cannot receive messages again')
 
    # Testing the modificacion of the status
 
     ag3 = SpyAgent('French')
-    ag3.addconfession('French','Je suis un espion américain')
+    ag3.add_confession('French','Je suis un espion américain')
     try:
-        ag3.sendmessage('Run')
-        ag3.sendmessage('Stop')
+        ag3.send_message('Run')
+        ag3.send_message('Stop')
         ag3.join()
-    except AgentStopped:
+    except AgentStoppedError:
         print('Cannot execute it again')
     
     print ("End of program before")

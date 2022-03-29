@@ -20,10 +20,14 @@ Module to develop an architecture of agents
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+__all__ = ['AgentStoppedError', 'Agent', 'SpyAgent', 'CounterAgent']
+__version__ = '0.0.1'
+__author__ = 'luisdsaco'
+
 from threading import Thread, Condition, Timer, Event
 from queue import Queue
 
-class AgentStopped(Exception):
+class AgentStoppedError(Exception):
     """
     AgentStopped: Exception raised when someone tries to run an operation on
         an agent that has been stopped.
@@ -38,25 +42,25 @@ class Agent(Thread):
     Agent: Base Class to process messages between agents and to run operations
     """
 
-    totalagents = 0
+    total_agents = 0
     def __init__(self,initialstate):
         Thread.__init__(self)
-        self.id = Agent.totalagents
-        Agent.totalagents += 1
+        self.id = Agent.total_agents
+        Agent.total_agents += 1
         self.state = initialstate
         self.message = 0
         self.send = Condition()
-        self.messagelist = Queue()
-        self.isRunning = False
+        self.message_list = Queue()
+        self.is_Running = False
         self.receive = Condition()
         self.start()
-        self.action = Thread(target=self.runaction)
+        self.action = Thread(target=self.run_action)
         self.ev = Event()
         self.action.start()
-        self.messageop={"Run": self.mainop,\
-                        "Thread": self.mainthreadop,\
-                        "Timer": self.maintimerop,\
-                        "Stop": self.mainopstop\
+        self.message_op={"Run": self.main_op,
+                        "Thread": self.main_thread_op,
+                        "Timer": self.main_timer_op,
+                        "Stop": self.main_op_stop
                         }
 
     def status(self):
@@ -65,39 +69,39 @@ class Agent(Thread):
     def ID(self):
         return self.id
        
-    def mainop(self):
+    def main_op(self):
         print('Running ', self.ID(), ' with status:', self.status())
     
-    def mainthreadop(self):
-        thd = Thread(target=self.mainop)
+    def main_thread_op(self):
+        thd = Thread(target=self.main_op)
         thd.start()
         
-    def maintimerop(self,time=3):
-        thd = Timer(time,self.mainop)
+    def main_timer_op(self,time=3):
+        thd = Timer(time,self.main_op)
         thd.start()
                        
-    def mainopstop(self):
+    def main_op_stop(self):
         pass
     
-    def setstatus(self,st):
+    def set_status(self,st):
         self.state = st
         
-    def totalAgents():
-        return Agent.totalagents    
+    def total_num_agents():
+        return Agent.total_agents    
 
     def clone(self):
         cn = Agent(self.status())
         return cn
     
-    def runaction(self):
-        while self.isRunning:
+    def run_action(self):
+        while self.is_Running:
             self.ev.wait()
-            self.processmessagelist()
+            self.process_message_list()
             self.ev.clear()
 
-    def sendmessage(self,msg):
-        if self.isRunning == False:
-            raise AgentStopped
+    def send_message(self,msg):
+        if not self.is_Running:
+            raise AgentStoppedError
             return
         with self.send:
             self.message = msg
@@ -105,31 +109,31 @@ class Agent(Thread):
         with self.receive:
             self.receive.wait()
     
-    def processmessage(self):
-        cmd = self.messagelist.get()
+    def process_message(self):
+        cmd = self.message_list.get()
         try:
-            self.messageop[cmd]()
+            self.message_op[cmd]()
         except KeyError:
             print("Command Error")
         finally:
-            self.messagelist.task_done()
+            self.message_list.task_done()
             
-    def processmessagelist(self):
-        while not self.messagelist.empty():
-            self.processmessage()
+    def process_message_list(self):
+        while not self.message_list.empty():
+            self.process_message()
 
     def run(self):
-        self.isRunning = True
-        while (self.isRunning):
+        self.is_Running = True
+        while self.is_Running:
             with self.send:
                 self.send.wait()
-                self.messagelist.put(self.message)
+                self.message_list.put(self.message)
                 if self.message == 'Stop':
-                    self.isRunning = False
+                    self.is_Running = False
                 self.ev.set()
             with self.receive:
                 self.receive.notify()
-        self.messagelist.join()
+        self.message_list.join()
 
 
 class SpyAgent(Agent):
@@ -143,24 +147,25 @@ class SpyAgent(Agent):
                            'Spanish': 'Soy un espía americano',
                            'German': 'Ich bin ein Americanisher Spion'
                            }
+        
         self.ag=CounterAgent()
         
-    def mainop(self):
+    def main_op(self):
         if self.ag.status() < 10 and self.status() == 'German':
-            self.ag.sendmessage('Run')
+            self.ag.send_message('Run')
             print('Nein')
         else:
-            self.fakeconfession()
+            self.fake_confession()
             
-    def mainopstop(self):
-        self.ag.sendmessage('Stop')
+    def main_op_stop(self):
+        self.ag.send_message('Stop')
         self.ag.join()
-        Agent.mainopstop(self)
+        Agent.main_op_stop(self)
             
-    def addconfession(self,l,m):
+    def add_confession(self,l,m):
         self.confession.update([(l,m)])
         
-    def fakeconfession(self):
+    def fake_confession(self):
         try:
             print (self.confession[self.state])
         except KeyError:
@@ -173,6 +178,6 @@ class CounterAgent(Agent):
     def __init__(self,initialstate=0):
         Agent.__init__(self,initialstate)
     
-    def mainop(self):
+    def main_op(self):
         self.state += 1
-        Agent.mainop(self)
+        Agent.main_op(self)
