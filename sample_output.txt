@@ -1,0 +1,58 @@
+Using Sacagents  0.0.1 : (C) 2022  luisdsaco
+The current status of created agent 0 is 0
+The total number of agents is 1
+The current status of created agent 1 is 5
+The total number of agents is 2
+The current status of created agent 2 is 0
+The total number of agents is 3
+The current status of created agent 3 is English
+The total number of agents is 5
+The current status of created agent 5 is 0
+The total number of agents is 6
+Running 0 with status: 0
+Running 1 with status: 5
+Running 2 with status: 0
+I am an American Spy
+Send message 0
+Send message 1
+Running 5 with status: 1
+Send message 2
+Send message 3
+Running 5 with status: 2
+Send message 4
+Running 5 with status: 3
+Running 5 with status: 4
+Running 5 with status: 5
+Nein
+Nein
+Nein
+Running 7 with status: 1
+Running 7 with status: 2
+Running 7 with status: 3
+Nein
+Running 7 with status: 4
+Nein
+Running 7 with status: 5
+Nein
+Running 7 with status: 6
+Nein
+Running 7 with status: 7
+Nein
+Running 7 with status: 8
+Nein
+Running 7 with status: 9
+Nein
+Running 7 with status: 10
+The current status of created agent 6 is German
+The total number of agents is 8
+The current status of created agent 8 is Spanish
+The total number of agents is 10
+Command Error
+The current status of created agent 10 is French
+The total number of agents is 12
+Language Error
+Agent is Stopped
+Cannot receive messages again
+Je suis un espion américain
+End of program before
+Ich bin ein Americanisher Spion
