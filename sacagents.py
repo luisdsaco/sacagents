@@ -24,7 +24,7 @@ __all__ = ['AgentStoppedError', 'Agent', 'SpyAgent', 'CounterAgent']
 __version__ = '0.0.1'
 __author__ = 'luisdsaco'
 
-from threading import Thread, Condition, Timer, Event
+from threading import Thread, Condition, Timer, Event, RLock
 from queue import Queue
 
 class AgentStoppedError(Exception):
@@ -43,6 +43,8 @@ class Agent(Thread):
     """
 
     total_agents = 0
+    io_lock = RLock()
+    
     def __init__(self,initialstate):
         Thread.__init__(self)
         self.id = Agent.total_agents
@@ -68,9 +70,15 @@ class Agent(Thread):
     
     def ID(self):
         return self.id
+    
+    def print_locked(self,*args,**kargs):
+        Agent.io_lock.acquire()
+        print(*args,**kargs)
+        Agent.io_lock.release()
        
     def main_op(self):
-        print('Running ', self.ID(), ' with status:', self.status())
+        self.print_locked('Running', self.ID(), 'with status:',
+                          self.status())
     
     def main_thread_op(self):
         thd = Thread(target=self.main_op)
@@ -153,7 +161,7 @@ class SpyAgent(Agent):
     def main_op(self):
         if self.ag.status() < 10 and self.status() == 'German':
             self.ag.send_message('Run')
-            print('Nein')
+            self.print_locked('Nein')
         else:
             self.fake_confession()
             
@@ -167,7 +175,7 @@ class SpyAgent(Agent):
         
     def fake_confession(self):
         try:
-            print (self.confession[self.state])
+            self.print_locked(self.confession[self.state])
         except KeyError:
             print("Language Error")
         

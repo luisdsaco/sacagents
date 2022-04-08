@@ -25,13 +25,13 @@ from sacagents import AgentStoppedError, Agent, SpyAgent, CounterAgent
 from sacagents import __version__ as sac_ver, __author__ as sac_auth
 
 def test_message(ag):
-    print ('The current status of created agent ', ag.ID(), ' is ',
+    ag.print_locked('The current status of created agent', ag.ID(), 'is',
            ag.status())
-    print ("The total number of agents is ", Agent.total_num_agents())
+    ag.print_locked("The total number of agents is", Agent.total_num_agents())
 
 if __name__ == "__main__":
     
-    print ("Using Sacagents ", sac_ver, ": (C) 2022 ", sac_auth)
+    print("Using Sacagents ", sac_ver, ": (C) 2022 ", sac_auth)
     
     # Testing Creation and Cloning
     
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     # Testing threded operations
     
     for i in range(5):
-        print("Send message ",i)
+        ag5.print_locked("Send message",i)
         ag5.send_message('Thread')
     
     ag5.send_message('Stop')
@@ -116,6 +116,6 @@ if __name__ == "__main__":
     except AgentStoppedError:
         print('Cannot execute it again')
     
-    print ("End of program before")
+    print("End of program before")
     
     # Delayed messages will appear after the last print command
